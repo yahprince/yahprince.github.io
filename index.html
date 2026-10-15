@@ -25,8 +25,8 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
     />
-    <link rel="stylesheet" href="hark.css" />
-    <link rel="stylesheet" href="hark-hero.css" />
+    <link rel="stylesheet" href="vectorstudio.css" />
+    <link rel="stylesheet" href="vectorstudio-hero.css" />
     <style>
       html, body { margin: 0; height: 100dvh; overflow: hidden; background: #1c1c1e; color: #f2f2f2; overscroll-behavior: none; }
       body { font-family: var(--sans); -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -57,6 +57,9 @@
       #build-mode .x-btn[data-mode="erase"][aria-pressed="true"] { border-color: #ff453a; background: rgba(255, 69, 58, 0.22); }
       .x-poly { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: var(--r-m); background: rgba(17, 17, 17, 0.88); border: 1px solid #2c2c2e; box-shadow: var(--hark-shadow); font: var(--type-caption); color: #aeaeb2; }
       .x-poly[hidden] { display: none; }
+      .x-poly__grp { display: flex; align-items: center; gap: 8px; }
+      .x-poly__grp[hidden] { display: none; }
+      .x-poly__dims { min-width: 84px; padding-right: 6px; font-family: "Geist Mono", monospace; color: #f2f2f2; white-space: nowrap; }
       .x-wnote { font: var(--type-caption); color: #ffb35c; margin: 4px 0 0; }
       .x-wnote[hidden] { display: none; }
       .x-dash[hidden] { display: none; }
@@ -83,6 +86,8 @@
       .x-xy[hidden] { display: none; }
       .x-xy input { width: 64px; min-height: var(--tap); box-sizing: border-box; border: 1px solid #3a3a3c; border-radius: var(--r-s); background: #1c1c1e; color: #f2f2f2; font: var(--type-label); text-align: center; -moz-appearance: textfield; }
       .x-xy input::-webkit-inner-spin-button { -webkit-appearance: none; }
+      .x-abfloat { flex-wrap: wrap; justify-content: center; align-items: center; width: max-content; max-width: calc(100% - 24px); box-sizing: border-box; }
+      .x-abfloat .x-xy input { width: 60px; }
       #node-float { flex-wrap: wrap; align-items: center; justify-content: center; max-width: calc(100% - 200px); }
       @media (max-width: 720px) { #node-float { left: 12px; transform: none; } }
       /* contextual strip */
@@ -297,12 +302,31 @@
           <button class="x-btn x-btn--small" id="build-done" type="button">Done</button>
         </div>
         <div class="x-poly" id="poly-float" hidden>
-          Sides
-          <div class="x-stepper" aria-label="Polygon sides">
-            <button type="button" id="poly-dec" aria-label="Fewer sides">−</button>
-            <input id="poly-sides" type="number" inputmode="numeric" min="3" max="12" step="1" value="6" aria-label="Number of sides" />
-            <button type="button" id="poly-inc" aria-label="More sides">+</button>
+          <span class="x-poly__grp" id="poly-sides-grp">
+            Sides
+            <span class="x-stepper" aria-label="Polygon sides">
+              <button type="button" id="poly-dec" aria-label="Fewer sides">−</button>
+              <input id="poly-sides" type="number" inputmode="numeric" min="3" max="12" step="1" value="6" aria-label="Number of sides" />
+              <button type="button" id="poly-inc" aria-label="More sides">+</button>
+            </span>
+          </span>
+          <span class="x-poly__grp" id="draw-opts" hidden>
+            <button class="x-btn x-btn--small is-on" id="d-ratio" type="button" aria-pressed="true" aria-label="Lock proportions" title="Lock proportions">
+              <svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
+            </button>
+            <span class="x-poly__dims" id="draw-dims" aria-live="off">W × H</span>
+          </span>
+        </div>
+        <div class="x-float x-abfloat" id="ab-float" role="group" aria-label="Selected artboard" hidden>
+          <div class="x-xy">
+            <label for="abf-x">X</label><input id="abf-x" type="number" inputmode="numeric" step="1" />
+            <label for="abf-y">Y</label><input id="abf-y" type="number" inputmode="numeric" step="1" />
           </div>
+          <div class="x-xy">
+            <label for="abf-w">W</label><input id="abf-w" type="number" inputmode="numeric" min="16" max="10000" step="1" />
+            <label for="abf-h">H</label><input id="abf-h" type="number" inputmode="numeric" min="16" max="10000" step="1" />
+          </div>
+          <button class="x-btn x-btn--small" id="abf-carry" type="button" aria-pressed="true" title="Move artwork with artboard">Move artwork</button>
         </div>
         <div class="x-float" id="node-float" hidden>
           <button class="x-btn x-btn--small x-btn--danger" id="node-delete" type="button">Delete point</button>
@@ -530,6 +554,8 @@
             <button class="x-btn x-btn--small" type="button" data-size="2550x3300">Letter</button>
           </div>
           <div class="x-row">
+            <input class="x-hex x-size-in" id="m-x" type="number" min="-100000" max="100000" inputmode="numeric" aria-label="X position in px" placeholder="X" />
+            <input class="x-hex x-size-in" id="m-y" type="number" min="-100000" max="100000" inputmode="numeric" aria-label="Y position in px" placeholder="Y" />
             <input class="x-hex x-size-in" id="m-w" type="number" min="16" max="10000" inputmode="numeric" aria-label="Width in px" placeholder="W" />
             <input class="x-hex x-size-in" id="m-h" type="number" min="16" max="10000" inputmode="numeric" aria-label="Height in px" placeholder="H" />
             <button class="x-btn x-btn--small" type="button" id="m-size-apply">Set</button>
@@ -541,6 +567,7 @@
       <nav class="x-bar" id="toolbar" aria-label="Tools">
         <button class="x-btn x-rail-toggle" id="rail-toggle" type="button" aria-label="Hide tools" title="Hide tools">«</button>
         <button class="x-btn" data-tool="select" type="button"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z" /></svg>Select</button>
+        <button class="x-btn" data-tool="artboard" type="button"><svg viewBox="0 0 24 24"><path d="M7 2v5H2M17 2v5h5M7 22v-5H2M17 22v-5h5" /><rect x="7" y="7" width="10" height="10" /></svg>Artboard</button>
         <button class="x-btn" data-tool="rect" type="button"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" /></svg>Rect</button>
         <button class="x-btn" data-tool="ellipse" type="button"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="6" /></svg>Ellipse</button>
         <button class="x-btn" data-tool="star" type="button"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z" /></svg>Star</button>
@@ -604,8 +631,22 @@
           boards.forEach((b) => {
             const on = b.id === activeId;
             if (on && boards.length > 1) new Path.Rectangle({ parent: uiLayer, rectangle: abRect(b), strokeColor: "#2f80ff", strokeWidth: 2 / z });
-            const t = new paper.PointText({ parent: uiLayer, point: new Point(b.x, b.y - 8 / z), content: b.name, fontFamily: "Geist, sans-serif", fontSize: 12 / z, fontWeight: on ? "600" : "400", fillColor: on ? "#2f80ff" : "#aeaeb2" });
-            labelHits.push({ id: b.id, rect: t.bounds.expand(12 / z, 20 / z) });
+            // label lives in document units: ~12px at 100%, a little larger on big boards; scales with zoom
+            const fs = Math.max(12, Math.min(b.w, b.h) / 90);
+            if (fs * z < 4) return; // too small to read on screen
+            const t = new paper.PointText({ parent: uiLayer, point: new Point(b.x, b.y - fs * 0.6), content: b.name, fontFamily: "Geist, sans-serif", fontSize: fs, fontWeight: on ? "600" : "400", fillColor: on ? "#2f80ff" : "#aeaeb2" });
+            if (t.bounds.width > b.w) {
+              // truncate with an ellipsis so the label never runs past its artboard
+              let lo = 0, hi = b.name.length - 1;
+              while (lo < hi) {
+                const mid = Math.ceil((lo + hi) / 2);
+                t.content = b.name.slice(0, mid).trimEnd() + "…";
+                if (t.bounds.width <= b.w) lo = mid; else hi = mid - 1;
+              }
+              t.content = b.name.slice(0, lo).trimEnd() + "…";
+              if (t.bounds.width > b.w) { t.remove(); return; }
+            }
+            labelHits.push({ id: b.id, rect: t.bounds.expand(Math.min(12 / z, b.w / 4), Math.min(20 / z, fs * 1.5)) });
           });
         }
         renderBoards();
@@ -777,21 +818,45 @@
         const OPPOSITE = { topLeft: "bottomRight", topRight: "bottomLeft", bottomRight: "topLeft", bottomLeft: "topRight" };
 
         // ---------- tools ----------
-        function shapeTool(make) {
+        // Lock proportions while drawing: equal W and H (larger drag wins, keeps drag direction); lines snap to 45°.
+        function constrainDraw(a, b, isLine) {
+          if (!lockRatio) return b;
+          const d = b.subtract(a);
+          if (isLine) {
+            const len = d.length;
+            if (len < 0.001) return b;
+            const ang = Math.round(d.angle / 45) * 45;
+            return a.add(new Point({ length: len, angle: ang }));
+          }
+          const m = Math.max(Math.abs(d.x), Math.abs(d.y));
+          return a.add(new Point(d.x < 0 ? -m : m, d.y < 0 ? -m : m));
+        }
+        function showDrawDims(a, b, isLine) {
+          const el = document.getElementById("draw-dims");
+          if (!el) return;
+          if (!a || !b) { el.textContent = "W × H"; return; }
+          const w = Math.round(Math.abs(b.x - a.x)), h = Math.round(Math.abs(b.y - a.y));
+          let t = `${w} × ${h}`;
+          if (isLine) t += ` · ${Math.round(((-b.subtract(a).angle % 360) + 360) % 360)}°`;
+          el.textContent = t;
+        }
+        function shapeTool(make, isLine) {
           let start = null, item = null;
           return {
-            down(p) { start = p; item = null; },
+            down(p) { start = p; item = null; showDrawDims(); },
             move(p) {
               if (!start) return;
               if (item) item.remove();
-              item = make(start, p);
+              const q = constrainDraw(start, p, isLine);
+              item = make(start, q, lockRatio);
+              showDrawDims(start, q, isLine);
             },
             up() {
               if (item && item.bounds.width < 4 && item.bounds.height < 4) { item.remove(); item = null; }
               if (item) { select(item); commit(); }
               start = null; item = null;
             },
-            cancel() { if (item) item.remove(); start = null; item = null; },
+            cancel() { if (item) item.remove(); start = null; item = null; showDrawDims(); },
           };
         }
 
@@ -928,11 +993,11 @@
           })(),
           rect: shapeTool((a, b) => new Path.Rectangle(Object.assign({ rectangle: new Rectangle(a, b) }, STYLE))),
           ellipse: shapeTool((a, b) => new Path.Ellipse(Object.assign({ rectangle: new Rectangle(a, b) }, STYLE))),
-          star: shapeTool((a, b) => {
+          star: shapeTool((a, b, locked) => {
             const r = new Rectangle(a, b);
             const r1 = Math.max(Math.min(r.width, r.height) / 2, 1);
             const s = new Path.Star(Object.assign({ center: r.center, points: 5, radius1: r1, radius2: r1 * 0.45 }, STYLE));
-            if (r.width > 1 && r.height > 1) s.bounds = r;
+            if (!locked && r.width > 1 && r.height > 1) s.bounds = r;
             return s;
           }),
           polygon: shapeTool((a, b) => {
@@ -942,7 +1007,7 @@
             s.data.sides = polySides;
             return s;
           }),
-          line: shapeTool((a, b) => new Path.Line({ from: a, to: b, strokeColor: STYLE.strokeColor, strokeWidth: STYLE.strokeWidth, strokeCap: "round" })),
+          line: shapeTool((a, b) => new Path.Line({ from: a, to: b, strokeColor: STYLE.strokeColor, strokeWidth: STYLE.strokeWidth, strokeCap: "round" }), true),
           pen: penTool(),
           node: nodeTool(),
           text: textTool(),
@@ -1262,7 +1327,7 @@
           applyAllFx();
           const prevRect = abRect(act());
           readBoards();
-          if (!abRect(act()).equals(prevRect)) { zoomFit(); setFitted(true); }
+          if (current !== "artboard" && !abRect(act()).equals(prevRect)) { zoomFit(); setFitted(true); }
           Object.values(tools).forEach((t) => t.reset && t.reset());
           if (window.VectorStudio) window.VectorStudio.layers = { boardLayer, shapesLayer, uiLayer };
           select(null);
@@ -1295,12 +1360,16 @@
         }
         function updateFloat() {
           const sp = selPolygon();
-          polyFloat.hidden = !(current === "polygon" || (current === "select" && sp));
+          const drawing = ["rect", "ellipse", "star", "polygon", "line"].includes(current);
+          polyFloat.hidden = !(drawing || (current === "select" && sp));
+          document.getElementById("poly-sides-grp").hidden = !(current === "polygon" || (current === "select" && sp));
+          document.getElementById("draw-opts").hidden = !drawing;
           if (document.activeElement !== polyIn) polyIn.value = sp ? sp.data.sides : polySides;
           penFloat.hidden = !(current === "pen" && tools.pen.hasPath());
           buildFloat.hidden = current !== "builder";
           if (current === "builder") tools.builder.ui();
           nodeFloat.hidden = !(current === "node" && tools.node.selected());
+          if (tools.artboard) tools.artboard.ui();
           updateNodeXY();
           updateNudge();
           updateStrip();
@@ -1514,7 +1583,7 @@
           if (pointers.size === 1) {
             const pp = view.viewToProject(viewPoint(e));
             const lh = labelHits.find((l) => l.rect.contains(pp));
-            if (lh && !(tools[current].hasPath && tools[current].hasPath())) { setActiveBoard(lh.id); return; }
+            if (lh && current !== "artboard" && !(tools[current].hasPath && tools[current].hasPath())) { setActiveBoard(lh.id); return; }
             toolActive = true;
             panSt = null;
             const r = tools[current].down(view.viewToProject(viewPoint(e)));
@@ -1652,7 +1721,7 @@
         const sRotBtn = document.getElementById("s-rotate"), sSizeBtn = document.getElementById("s-size");
         const tfAngle = document.getElementById("tf-angle"), tfRange = document.getElementById("tf-angle-range");
         const tfW = document.getElementById("tf-w"), tfH = document.getElementById("tf-h"), tfPct = document.getElementById("tf-pct");
-        const ratioBtns = [document.getElementById("s-ratio"), document.getElementById("tf-ratio")];
+        const ratioBtns = [document.getElementById("s-ratio"), document.getElementById("tf-ratio"), document.getElementById("d-ratio")];
         const tfFree = document.getElementById("tf-free");
         function curAngle() { const it = live(state.selected); return it ? normAngle(it.data.angle || 0) : 0; }
         function syncTf() {
@@ -4158,7 +4227,187 @@
             <button type="button" data-del aria-label="Delete ${esc(b.name)}" title="Delete"${boards.length < 2 ? " disabled" : ""}><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13" /></svg></button></li>`).join("");
           const a = act();
           mW.value = a.w; mH.value = a.h;
+          mX.value = a.x; mY.value = a.y;
         }
+        const mX = document.getElementById("m-x"), mY = document.getElementById("m-y");
+        // items whose bounds sit inside an artboard (they travel with it when "Move artwork" is on)
+        function artInside(b) {
+          const r = abRect(b).expand(0.5);
+          return shapesLayer.children.filter((c) => !isLocked(c) && r.contains(c.bounds));
+        }
+        // move/resize an artboard to exact values; carries its artwork when asked
+        function placeBoard(b, x, y, w, h, carry) {
+          if (carry && (x !== b.x || y !== b.y)) {
+            const d = new Point(x - b.x, y - b.y);
+            artInside(b).forEach((it) => it.translate(d));
+          }
+          b.x = x; b.y = y; b.w = w; b.h = h;
+        }
+
+        // ---------- artboard tool: select, move, resize artboards ----------
+        tools.artboard = (function () {
+          let sel = null, mode = null, downP = null, orig = null, hName = null, carry = [], applied = null, moved = false, tg = null;
+          let moveArt = true;
+          const fl = document.getElementById("ab-float");
+          const fx = document.getElementById("abf-x"), fy = document.getElementById("abf-y");
+          const fw = document.getElementById("abf-w"), fh = document.getElementById("abf-h");
+          const carryBtn = document.getElementById("abf-carry");
+          function selB() { return boards.find((b) => b.id === sel) || null; }
+          function pick(id) {
+            sel = id;
+            if (id && id !== activeId) {
+              activeId = id;
+              syncArt();
+              boardLayer.data = { artboards: JSON.parse(JSON.stringify(boards)), activeArtboard: activeId };
+              if (!abScrim.hidden) renderAB();
+            }
+          }
+          function handlesOf(b) {
+            const r = abRect(b);
+            const list = [["tl", r.topLeft], ["tr", r.topRight], ["br", r.bottomRight], ["bl", r.bottomLeft]];
+            // edge handles only when the board is big enough on screen to still leave room to drag it
+            if (Math.min(b.w, b.h) * view.zoom > 80) list.push(["t", r.topCenter], ["r", r.rightCenter], ["b", r.bottomCenter], ["l", r.leftCenter]);
+            return list;
+          }
+          function targets() {
+            const xs = [], ys = [];
+            boards.forEach((a) => { if (a.id === sel) return; xs.push(a.x, a.x + a.w / 2, a.x + a.w); ys.push(a.y, a.y + a.h / 2, a.y + a.h); });
+            return { xs, ys };
+          }
+          function boardAt(p) {
+            for (let i = boards.length - 1; i >= 0; i--) if (abRect(boards[i]).contains(p)) return boards[i].id;
+            const lh = labelHits.find((l) => l.rect.contains(p));
+            return lh ? lh.id : null;
+          }
+          function revert() {
+            const b = selB();
+            if (!b || !orig || !moved) return;
+            if (mode === "move" && applied) carry.forEach((it) => it.translate(applied.multiply(-1)));
+            Object.assign(b, { x: orig.x, y: orig.y, w: orig.w, h: orig.h });
+            renderBoards();
+          }
+          function ui() {
+            const show = current === "artboard";
+            fl.hidden = !show;
+            if (!show) return;
+            const b = selB() || act();
+            [[fx, b.x], [fy, b.y], [fw, b.w], [fh, b.h]].forEach(([el, v]) => { if (document.activeElement !== el) el.value = v; });
+            carryBtn.setAttribute("aria-pressed", String(moveArt));
+          }
+          function applyNum() {
+            const b = selB() || act();
+            const v = [fx, fy, fw, fh].map((el) => Math.round(parseFloat(el.value)));
+            if (!v.every(Number.isFinite)) { ui(); return; }
+            const w = Math.min(10000, Math.max(16, v[2])), h = Math.min(10000, Math.max(16, v[3]));
+            if (v[0] === b.x && v[1] === b.y && w === b.w && h === b.h) { ui(); return; }
+            placeBoard(b, v[0], v[1], w, h, moveArt);
+            boardsChanged(false);
+          }
+          [fx, fy, fw, fh].forEach((el) => {
+            el.addEventListener("change", applyNum);
+            el.addEventListener("keydown", (e) => { e.stopPropagation(); if (e.key === "Enter") el.blur(); });
+          });
+          carryBtn.addEventListener("click", () => {
+            moveArt = !moveArt;
+            carryBtn.setAttribute("aria-pressed", String(moveArt));
+            toast(moveArt ? "Artwork moves with artboard" : "Artboard moves alone", 1500);
+          });
+          return {
+            ui,
+            moveArt: () => moveArt,
+            activate() { select(null); sel = activeId; },
+            deactivate() { revert(); mode = null; guides = []; carry = []; fl.hidden = true; },
+            reset() { mode = null; carry = []; if (!selB()) sel = current === "artboard" ? activeId : null; },
+            down(p) {
+              moved = false; mode = null; downP = p; guides = []; applied = new Point(0, 0); carry = [];
+              const b = selB();
+              if (b) {
+                const tol = 22 / view.zoom;
+                let best = null;
+                handlesOf(b).forEach(([n, pt]) => { const d = pt.getDistance(p); if (d < tol && (!best || d < best.d)) best = { n, d }; });
+                if (best) { mode = "resize"; hName = best.n; orig = Object.assign({}, b); tg = targets(); return; }
+              }
+              const id = boardAt(p);
+              if (id) {
+                pick(id);
+                const nb = selB();
+                mode = "move";
+                orig = Object.assign({}, nb);
+                carry = moveArt ? artInside(nb) : [];
+                tg = targets();
+                drawSelection();
+                return;
+              }
+              mode = "tap-empty";
+              return "pan";
+            },
+            panEnd() { mode = null; },
+            move(p) {
+              const b = selB();
+              if (!b || (mode !== "move" && mode !== "resize")) return;
+              if (!moved && p.getDistance(downP) * view.zoom < 4) return;
+              moved = true;
+              guides = [];
+              const tol = SNAP_PX / view.zoom;
+              if (mode === "move") {
+                const d = p.subtract(downP);
+                let nx = orig.x + d.x, ny = orig.y + d.y;
+                if (snapOn) {
+                  const sx = snap1([nx, nx + orig.w / 2, nx + orig.w], tg.xs, tol);
+                  const sy = snap1([ny, ny + orig.h / 2, ny + orig.h], tg.ys, tol);
+                  if (sx) { nx += sx.d; guides.push({ x: sx.c }); }
+                  if (sy) { ny += sy.d; guides.push({ y: sy.c }); }
+                }
+                b.x = Math.round(nx); b.y = Math.round(ny);
+                const dd = new Point(b.x - orig.x, b.y - orig.y), step = dd.subtract(applied);
+                if (!step.isZero()) carry.forEach((it) => it.translate(step));
+                applied = dd;
+              } else {
+                let x = p.x, y = p.y;
+                const hx = hName.includes("l") || hName.includes("r"), hy = hName.includes("t") || hName.includes("b");
+                if (snapOn) {
+                  const sx = hx ? snap1([x], tg.xs, tol) : null, sy = hy ? snap1([y], tg.ys, tol) : null;
+                  if (sx) { x = sx.c; guides.push({ x: sx.c }); }
+                  if (sy) { y = sy.c; guides.push({ y: sy.c }); }
+                }
+                let L = orig.x, T = orig.y, R = orig.x + orig.w, B = orig.y + orig.h;
+                if (hName.includes("l")) L = Math.max(R - 10000, Math.min(Math.round(x), R - 16));
+                if (hName.includes("r")) R = Math.min(L + 10000, Math.max(Math.round(x), L + 16));
+                if (hName.includes("t")) T = Math.max(B - 10000, Math.min(Math.round(y), B - 16));
+                if (hName.includes("b")) B = Math.min(T + 10000, Math.max(Math.round(y), T + 16));
+                b.x = L; b.y = T; b.w = R - L; b.h = B - T;
+              }
+              renderBoards();
+              setFitted(false);
+              drawSelection();
+            },
+            up() {
+              const m = mode;
+              mode = null; guides = []; carry = [];
+              if (m === "tap-empty") { sel = null; drawSelection(); return; }
+              if ((m === "move" || m === "resize") && moved) { commit(); if (!abScrim.hidden) renderAB(); }
+              else drawSelection();
+            },
+            cancel() { revert(); mode = null; carry = []; guides = []; drawSelection(); },
+            draw() {
+              const b = selB();
+              if (!b) return;
+              const z = view.zoom;
+              new Path.Rectangle({ parent: uiLayer, rectangle: abRect(b), strokeColor: "#2f80ff", strokeWidth: 3 / z });
+              handlesOf(b).forEach(([, pt]) => new Path.Rectangle({
+                parent: uiLayer, rectangle: new Rectangle(pt.subtract(6 / z), pt.add(6 / z)),
+                fillColor: "white", strokeColor: "#2f80ff", strokeWidth: 2 / z,
+              }));
+              const vb = view.bounds;
+              guides.forEach((g) => new Path.Line({
+                parent: uiLayer,
+                from: g.x != null ? new Point(g.x, vb.top) : new Point(vb.left, g.y),
+                to: g.x != null ? new Point(g.x, vb.bottom) : new Point(vb.right, g.y),
+                strokeColor: "#ff2bd6", strokeWidth: 1 / z,
+              }));
+            },
+          };
+        })();
         function setActiveBoard(id) {
           if (!boards.some((b) => b.id === id)) return;
           activeId = id;
@@ -4231,12 +4480,16 @@
             zoomFit(); setFitted(true);
           } else { zoomFit(); setFitted(true); }
         });
-        function setArtboard(w, h) {
+        function setArtboard(w, h, x, y) {
           w = Math.round(Number(w)); h = Math.round(Number(h));
           if (!(w >= 16 && h >= 16 && w <= 10000 && h <= 10000)) { toast("Use sizes from 16 to 10000 px"); return; }
           finishTool();
           const a = act();
-          a.w = w; a.h = h;
+          x = x === undefined || x === "" ? a.x : Math.round(Number(x));
+          y = y === undefined || y === "" ? a.y : Math.round(Number(y));
+          if (!Number.isFinite(x)) x = a.x;
+          if (!Number.isFinite(y)) y = a.y;
+          placeBoard(a, x, y, w, h, tools.artboard.moveArt());
           boardsChanged(true);
           toast(`${a.name} ${w} × ${h}`, 2000);
         }
@@ -4244,8 +4497,8 @@
           const [w, h] = b.dataset.size.split("x");
           setArtboard(w, h);
         }));
-        document.getElementById("m-size-apply").addEventListener("click", () => setArtboard(mW.value, mH.value));
-        [mW, mH].forEach((el) => el.addEventListener("keydown", (e) => { if (e.key === "Enter") setArtboard(mW.value, mH.value); }));
+        document.getElementById("m-size-apply").addEventListener("click", () => setArtboard(mW.value, mH.value, mX.value, mY.value));
+        [mX, mY, mW, mH].forEach((el) => el.addEventListener("keydown", (e) => { if (e.key === "Enter") setArtboard(mW.value, mH.value, mX.value, mY.value); }));
         document.getElementById("m-new").addEventListener("click", () => { mConfirm.hidden = false; });
         document.getElementById("m-cancel").addEventListener("click", () => { mConfirm.hidden = true; });
         document.getElementById("m-clear").addEventListener("click", () => {
