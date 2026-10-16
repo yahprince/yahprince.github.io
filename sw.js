@@ -1,6 +1,6 @@
-const CACHE = "vstudio-v3";
+const CACHE = "vstudio-v10";
 const CORE = ["./", "./index.html", "./manifest.json", 
-  "./paper-full.min.js", "./opentype.min.js", "./icon-192.png", "./icon-512.png"];
+  "./paper-full.min.js", "./opentype.min.js", "./jspdf.umd.min.js", "./svg2pdf.umd.min.js", "./lcms.min.js", "./lcms.wasm", "./CGATS21_CRPC5.icc", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 function cacheFirst(req) {
